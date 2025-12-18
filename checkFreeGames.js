@@ -8,6 +8,30 @@ if (!WEBHOOK_URL) {
   process.exit(1);
 }
 
+async function checkFreeGames() {
+  console.log("🔍 Checking global Steam free games...");
+
+  const freeGames = await fetchSteamDBFreeGames();
+
+  console.log(`📦 Found ${freeGames.length} free games`);
+
+  if (freeGames.length === 0) {
+    console.log("ℹ️ No free Steam games right now");
+    return;
+  }
+
+  const channel = await getDiscordChannel();
+
+  for (const game of freeGames) {
+    await channel.send(
+      `🎉 **FREE GAME on Steam!**\n` +
+      `🕹 **${game.name}**\n` +
+      `🔗 ${game.link}`
+    );
+  }
+}
+
+
 async function fetchSteamFreeGames() {
   const res = await fetch("https://steamdb.info/sales/?min_discount=100");
   const html = await res.text();
